@@ -18,6 +18,22 @@ public class TimeServlet extends HttpServlet {
         String timezone = req.getParameter("timezone");
         ZoneId zoneId;
 
+        zoneId = getZoneId(resp, timezone);
+        if (zoneId == null) return;
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(zoneId);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss 'UTC'XXX");
+            String formattedDateTime = zonedDateTime.format(formatter);
+            resp.setContentType("text/html; charset=utf-8");
+        try {
+            resp.getWriter().write("<html><body><h1>" + formattedDateTime + "</h1></body></html>");
+            resp.getWriter().close();
+        } catch (IOException e) {
+            e.getStackTrace();
+        }
+    }
+
+    private static ZoneId getZoneId(HttpServletResponse resp, String timezone) {
+        ZoneId zoneId;
         if (timezone != null && !timezone.trim().isEmpty()) {
             timezone = timezone.replace(" ", "+");
             try {
@@ -32,22 +48,12 @@ public class TimeServlet extends HttpServlet {
                 } catch (IOException ex) {
                     e.getStackTrace();
                 }
-                return;
+                return null;
             }
         } else {
             zoneId = ZoneId.of("UTC");
         }
-            ZonedDateTime zonedDateTime = ZonedDateTime.now(zoneId);
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss 'UTC'XXX");
-            String formattedDateTime = zonedDateTime.format(formatter);
-
-            resp.setContentType("text/html; charset=utf-8");
-        try {
-            resp.getWriter().write("<html><body><h1>" + formattedDateTime + "</h1></body></html>");
-            resp.getWriter().close();
-        } catch (IOException e) {
-            e.getStackTrace();
-        }
+        return zoneId;
     }
 }
 
