@@ -14,7 +14,7 @@ import java.time.format.DateTimeFormatter;
 @WebServlet(value = "/time")
 public class TimeServlet extends HttpServlet {
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
         String timezone = req.getParameter("timezone");
         ZoneId zoneId;
 
@@ -25,9 +25,13 @@ public class TimeServlet extends HttpServlet {
             } catch (DateTimeException e) {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 resp.setContentType("text/html; charset=utf-8");
-                resp.getWriter().write("<html><body><h1>Invalid timezone: " + timezone +
-                        "</h1><p>Enter the timezone e.g., Europe/Kiev</p>" +
-                        "<button onclick=\"window.history.back();\">Back</button></body></html>");
+                try {
+                    resp.getWriter().write("<html><body><h1>Invalid timezone: " + timezone +
+                            "</h1><p>Enter the timezone e.g., Europe/Kiev</p>" +
+                            "<button onclick=\"window.history.back();\">Back</button></body></html>");
+                } catch (IOException ex) {
+                    e.getStackTrace();
+                }
                 return;
             }
         } else {
@@ -38,8 +42,12 @@ public class TimeServlet extends HttpServlet {
             String formattedDateTime = zonedDateTime.format(formatter);
 
             resp.setContentType("text/html; charset=utf-8");
+        try {
             resp.getWriter().write("<html><body><h1>" + formattedDateTime + "</h1></body></html>");
             resp.getWriter().close();
+        } catch (IOException e) {
+            e.getStackTrace();
+        }
     }
 }
 
